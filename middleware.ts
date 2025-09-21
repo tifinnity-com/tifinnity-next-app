@@ -23,6 +23,10 @@ export async function middleware(req: NextRequest) {
   const {
     data: { session },
   } = await supabase.auth.getSession();
+    const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  console.log(user,session)
 
   const role = session?.user?.user_metadata?.role;
   const pathname = req.nextUrl.pathname;

@@ -1,9 +1,12 @@
 'use client';
 
 import { Button } from "@/components/ui/button";
+import { createClient } from "@/utils/supabase/client";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
+
 
 interface AuthFormProps {
   mode: "login" | "signup";
@@ -22,6 +25,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [isSuccess, setIsSuccess] = useState(true);
   const [message, setMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState<FormData>({
     name: "",
     email: "",
@@ -29,7 +33,9 @@ export default function AuthForm({ mode }: AuthFormProps) {
     confirmPassword: "",
     remember: false
   });
+  const supabase = createClient()
   const [errors, setErrors] = useState<Partial<FormData>>({});
+  const router = useRouter();
   
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value, type, checked } = e.target;
@@ -38,7 +44,6 @@ export default function AuthForm({ mode }: AuthFormProps) {
       [id]: type === 'checkbox' ? checked : value
     }));
     
-    // Clear error when user starts typing
     if (errors[id as keyof FormData]) {
       setErrors(prev => {
         const newErrors = { ...prev };
@@ -75,30 +80,74 @@ export default function AuthForm({ mode }: AuthFormProps) {
     return Object.keys(newErrors).length === 0;
   };
   
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleLogin = async () => {
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: formData.email,
+        password: formData.password,
+      });
+      
+      if (error) throw error;
+      
+      setIsSuccess(true);
+      setMessage("You have successfully logged in!");
+      setShowConfirmation(true);
+
+      setTimeout(() => {
+        router.push("/dashboard");
+      }, 2000);
+      
+    } catch (error: any) {
+      setIsSuccess(false);
+      setMessage(error.message || "An error occurred during login");
+      setShowConfirmation(true);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  const handleSignup = async () => {
+    try {
+      const { error } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+          data: {
+            full_name: formData.name,
+            // Add any additional user metadata you need
+          },
+        },
+      });
+      
+      if (error) throw error;
+      
+      setIsSuccess(true);
+      setMessage("Account created successfully! Please check your email to verify your account.");
+      setShowConfirmation(true);
+      
+    } catch (error: any) {
+      setIsSuccess(false);
+      setMessage(error.message || "An error occurred during signup");
+      setShowConfirmation(true);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
     
     if (!validateForm()) {
+      setIsLoading(false);
       return;
     }
     
-    // Mock authentication - in a real app, this would be an API call
     if (isLogin) {
-      // Mock login - check for demo credentials
-      if (formData.email === "demo@example.com" && formData.password === "password") {
-        setIsSuccess(true);
-        setMessage("You have successfully logged in!");
-        setShowConfirmation(true);
-      } else {
-        setIsSuccess(false);
-        setMessage("Invalid email or password. Please try again.");
-        setShowConfirmation(true);
-      }
+      await handleLogin();
     } else {
-      // Mock signup - always successful for demo
-      setIsSuccess(true);
-      setMessage("Account created successfully! A verification email has been sent to your email address.");
-      setShowConfirmation(true);
+      await handleSignup();
     }
   };
   
@@ -163,6 +212,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
                       }`}
                       value={formData.name}
                       onChange={handleInputChange}
+                      disabled={isLoading}
                     />
                     {errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
                   </div>
@@ -181,6 +231,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
                     }`}
                     value={formData.email}
                     onChange={handleInputChange}
+                    disabled={isLoading}
                   />
                   {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
                 </div>
@@ -198,13 +249,9 @@ export default function AuthForm({ mode }: AuthFormProps) {
                     }`}
                     value={formData.password}
                     onChange={handleInputChange}
+                    disabled={isLoading}
                   />
                   {errors.password && <p className="text-red-500 text-sm">{errors.password}</p>}
-                  {isLogin && (
-                    <p className="text-sm text-tifinnity-gray">
-                      Demo: demo@example.com / password
-                    </p>
-                  )}
                 </div>
                 
                 {!isLogin && (
@@ -221,6 +268,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
                       }`}
                       value={formData.confirmPassword}
                       onChange={handleInputChange}
+                      disabled={isLoading}
                     />
                     {errors.confirmPassword && <p className="text-red-500 text-sm">{errors.confirmPassword}</p>}
                   </div>
@@ -235,6 +283,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
                         className="h-4 w-4 text-tifinnity-green focus:ring-tifinnity-green border-gray-300 rounded"
                         checked={formData.remember}
                         onChange={handleInputChange}
+                        disabled={isLoading}
                       />
                       <label htmlFor="remember" className="ml-2 block text-sm text-tifinnity-gray">
                         Remember me
@@ -250,8 +299,19 @@ export default function AuthForm({ mode }: AuthFormProps) {
                 <Button 
                   type="submit" 
                   className="w-full bg-tifinnity-green hover:bg-tifinnity-green/90 text-white py-3 rounded-md transition-colors"
+                  disabled={isLoading}
                 >
-                  {isLogin ? "Sign In" : "Create Account"}
+                  {isLoading ? (
+                    <span className="flex items-center justify-center">
+                      <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Processing...
+                    </span>
+                  ) : (
+                    isLogin ? "Sign In" : "Create Account"
+                  )}
                 </Button>
               </form>
               
@@ -262,7 +322,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
                     href={isLogin ? "/auth/signup" : "/auth/login"} 
                     className="text-tifinnity-green hover:underline font-medium"
                     onClick={(e) => {
-                      e.preventDefault();
+                      if (isLoading) e.preventDefault();
                       setIsLogin(!isLogin);
                       setErrors({});
                     }}
@@ -282,7 +342,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
               </div>
               
               <div className="flex justify-center">
-                <Button variant="outline" className="py-2 w-full max-w-xs">
+                <Button variant="outline" className="py-2 w-full max-w-xs" disabled={isLoading}>
                   <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
                     <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                     <path fill="currentColor" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -347,7 +407,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
                     : 'bg-red-500 hover:bg-red-600'
                 } text-white px-6 py-2 rounded-md`}
               >
-                {isSuccess ? (isLogin ? "Continue" : "Go to Login") : "Try Again"}
+                {isSuccess ? (isLogin ? "Continue" : "Okay") : "Try Again"}
               </Button>
             </div>
           </div>

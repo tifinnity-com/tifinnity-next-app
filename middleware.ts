@@ -27,25 +27,22 @@ export async function middleware(req: NextRequest) {
   const role = session?.user?.user_metadata?.role;
   const pathname = req.nextUrl.pathname;
 
+  // Role-based access control
   if (pathname.startsWith("/partner") && role !== "partner") {
     return NextResponse.redirect(
       new URL("/unauthorized?reason=partner", req.url)
     );
   }
 
-  if (pathname.startsWith("/admin") && role !== "admin") {
+  if (pathname.startsWith("/student") && role !== "student") {
     return NextResponse.redirect(
-      new URL("/unauthorized?reason=admin", req.url)
+      new URL("/unauthorized?reason=student", req.url)
     );
-  }
-
-  if (pathname.startsWith("/user") && !role) {
-    return NextResponse.redirect(new URL("/login", req.url));
   }
 
   return res;
 }
 
 export const config = {
-  matcher: ["/partner/:path*", "/admin/:path*", "/user/:path*"],
+  matcher: ["/partner/:path*", "/student/:path*"],
 };

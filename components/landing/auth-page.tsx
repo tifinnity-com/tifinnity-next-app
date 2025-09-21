@@ -7,7 +7,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-
 interface AuthFormProps {
   mode: "login" | "signup";
 }
@@ -33,26 +32,17 @@ export default function AuthForm({ mode }: AuthFormProps) {
     confirmPassword: "",
     remember: false,
   });
-  const supabase = createClient()
+  const supabase = createClient();
   const [errors, setErrors] = useState<Partial<FormData>>({});
-<<<<<<< HEAD:components/landing/auth-page.tsx
-
-=======
   const router = useRouter();
-  
->>>>>>> 653cc85f3ac578e93f17273a0b9f5f777d0b439c:components/landing/Authpage.tsx
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value, type, checked } = e.target;
     setFormData((prev) => ({
       ...prev,
       [id]: type === "checkbox" ? checked : value,
     }));
-<<<<<<< HEAD:components/landing/auth-page.tsx
 
-    // Clear error when user starts typing
-=======
-    
->>>>>>> 653cc85f3ac578e93f17273a0b9f5f777d0b439c:components/landing/Authpage.tsx
     if (errors[id as keyof FormData]) {
       setErrors((prev) => {
         const newErrors = { ...prev };
@@ -88,124 +78,76 @@ export default function AuthForm({ mode }: AuthFormProps) {
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-<<<<<<< HEAD:components/landing/auth-page.tsx
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-=======
-  
   const handleLogin = async () => {
     try {
       const { error } = await supabase.auth.signInWithPassword({
         email: formData.email,
         password: formData.password,
       });
-      
+
       if (error) throw error;
-      
+
       setIsSuccess(true);
       setMessage("You have successfully logged in!");
       setShowConfirmation(true);
 
       setTimeout(() => {
-        router.push("/dashboard");
+        router.push("/partner/dashboard");
       }, 2000);
-      
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : "Internal Server Error";
       setIsSuccess(false);
-      setMessage(error.message || "An error occurred during login");
+      setMessage(message || "An error occurred during login");
       setShowConfirmation(true);
     } finally {
       setIsLoading(false);
     }
   };
-  
+
   const handleSignup = async () => {
     try {
       const { error } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
         options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
           data: {
             full_name: formData.name,
-            // Add any additional user metadata you need
+            role: "partner",
           },
         },
       });
-      
+
       if (error) throw error;
-      
-      setIsSuccess(true);
-      setMessage("Account created successfully! Please check your email to verify your account.");
-      setShowConfirmation(true);
-      
-    } catch (error: any) {
+
+      router.push("/auth/signup-sucess");
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "An error occurred during signup";
       setIsSuccess(false);
-      setMessage(error.message || "An error occurred during signup");
+      setMessage(message);
       setShowConfirmation(true);
     } finally {
       setIsLoading(false);
     }
   };
-  
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    
->>>>>>> 653cc85f3ac578e93f17273a0b9f5f777d0b439c:components/landing/Authpage.tsx
+
     if (!validateForm()) {
       setIsLoading(false);
       return;
     }
-<<<<<<< HEAD:components/landing/auth-page.tsx
 
-    if (isLogin) {
-      // Mock login - check for demo credentials
-      const supabase = createClient();
-
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: formData.email,
-        password: formData.password,
-      });
-
-      if (data) {
-        setIsSuccess(true);
-        setMessage("You have successfully logged in!");
-        setShowConfirmation(true);
-      }
-
-      if (error) {
-        setIsSuccess(false);
-        setMessage("Invalid email or password. Please try again.");
-        setShowConfirmation(true);
-      }
-    } else {
-      // Mock signup - always successful for demo
-      const { data, error } = await supabase.auth.signUp({
-        email: formData.email,
-        password: formData.password,
-        options: {
-          emailRedirectTo: {},
-          data: {
-            name: formData.name,
-            role: "partner",
-          },
-        },
-      });
-      setIsSuccess(true);
-      setMessage(
-        "Account created successfully! A verification email has been sent to your email address."
-      );
-      setShowConfirmation(true);
-=======
-    
     if (isLogin) {
       await handleLogin();
     } else {
       await handleSignup();
->>>>>>> 653cc85f3ac578e93f17273a0b9f5f777d0b439c:components/landing/Authpage.tsx
     }
   };
 
@@ -326,18 +268,9 @@ export default function AuthForm({ mode }: AuthFormProps) {
                     onChange={handleInputChange}
                     disabled={isLoading}
                   />
-<<<<<<< HEAD:components/landing/auth-page.tsx
                   {errors.password && (
                     <p className="text-red-500 text-sm">{errors.password}</p>
                   )}
-                  {isLogin && (
-                    <p className="text-sm text-tifinnity-gray">
-                      Demo: demo@example.com / password
-                    </p>
-                  )}
-=======
-                  {errors.password && <p className="text-red-500 text-sm">{errors.password}</p>}
->>>>>>> 653cc85f3ac578e93f17273a0b9f5f777d0b439c:components/landing/Authpage.tsx
                 </div>
 
                 {!isLogin && (
@@ -404,14 +337,32 @@ export default function AuthForm({ mode }: AuthFormProps) {
                 >
                   {isLoading ? (
                     <span className="flex items-center justify-center">
-                      <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      <svg
+                        className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
                       </svg>
                       Processing...
                     </span>
+                  ) : isLogin ? (
+                    "Sign In"
                   ) : (
-                    isLogin ? "Sign In" : "Create Account"
+                    "Create Account"
                   )}
                 </Button>
               </form>
@@ -447,7 +398,11 @@ export default function AuthForm({ mode }: AuthFormProps) {
               </div>
 
               <div className="flex justify-center">
-                <Button variant="outline" className="py-2 w-full max-w-xs" disabled={isLoading}>
+                <Button
+                  variant="outline"
+                  className="py-2 w-full max-w-xs"
+                  disabled={isLoading}
+                >
                   <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
                     <path
                       fill="currentColor"
@@ -550,15 +505,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
                     : "bg-red-500 hover:bg-red-600"
                 } text-white px-6 py-2 rounded-md`}
               >
-<<<<<<< HEAD:components/landing/auth-page.tsx
-                {isSuccess
-                  ? isLogin
-                    ? "Continue"
-                    : "Go to Login"
-                  : "Try Again"}
-=======
                 {isSuccess ? (isLogin ? "Continue" : "Okay") : "Try Again"}
->>>>>>> 653cc85f3ac578e93f17273a0b9f5f777d0b439c:components/landing/Authpage.tsx
               </Button>
             </div>
           </div>

@@ -1,5 +1,5 @@
 import { createClient } from "@/utils/supabase/client";
-import { User } from "@supabase/supabase-js";
+import type { User } from "@supabase/supabase-js";
 import { useEffect, useState, createContext, useContext } from "react";
 
 type Profile = {

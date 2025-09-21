@@ -84,11 +84,11 @@ export default function AuthForm({ mode }: AuthFormProps) {
 
   const handleLogin = async () => {
     try {
-      const { data,error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email: formData.email,
         password: formData.password,
       });
-      console.log(data)
+      console.log(data);
       if (error) throw error;
 
       setIsSuccess(true);
@@ -106,9 +106,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
       setShowConfirmation(true);
     } finally {
       setIsLoading(false);
-
     }
-    
   };
 
   const handleSignup = async () => {
@@ -118,7 +116,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
         password: formData.password,
         options: {
           data: {
-            full_name: formData.name,
+            name: formData.name,
             role: "partner",
           },
         },

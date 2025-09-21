@@ -1,6 +1,7 @@
-'use client';
+"use client";
 
 import { Button } from "@/components/ui/button";
+import { createClient } from "@/utils/supabase/client";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
@@ -27,84 +28,105 @@ export default function AuthForm({ mode }: AuthFormProps) {
     email: "",
     password: "",
     confirmPassword: "",
-    remember: false
+    remember: false,
   });
   const [errors, setErrors] = useState<Partial<FormData>>({});
-  
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value, type, checked } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [id]: type === 'checkbox' ? checked : value
+      [id]: type === "checkbox" ? checked : value,
     }));
-    
+
     // Clear error when user starts typing
     if (errors[id as keyof FormData]) {
-      setErrors(prev => {
+      setErrors((prev) => {
         const newErrors = { ...prev };
         delete newErrors[id as keyof FormData];
         return newErrors;
       });
     }
   };
-  
+
   const validateForm = () => {
     const newErrors: Partial<FormData> = {};
-    
+
     if (!isLogin && !formData.name.trim()) {
       newErrors.name = "Name is required";
     }
-    
+
     if (!formData.email.trim()) {
       newErrors.email = "Email is required";
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = "Email is invalid";
     }
-    
+
     if (!formData.password) {
       newErrors.password = "Password is required";
     } else if (formData.password.length < 6) {
       newErrors.password = "Password must be at least 6 characters";
     }
-    
+
     if (!isLogin && formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = "Passwords do not match";
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-  
-  const handleSubmit = (e: React.FormEvent) => {
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
-    
-    // Mock authentication - in a real app, this would be an API call
+
     if (isLogin) {
       // Mock login - check for demo credentials
-      if (formData.email === "demo@example.com" && formData.password === "password") {
+      const supabase = createClient();
+
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: formData.email,
+        password: formData.password,
+      });
+
+      if (data) {
         setIsSuccess(true);
         setMessage("You have successfully logged in!");
         setShowConfirmation(true);
-      } else {
+      }
+
+      if (error) {
         setIsSuccess(false);
         setMessage("Invalid email or password. Please try again.");
         setShowConfirmation(true);
       }
     } else {
       // Mock signup - always successful for demo
+      const { data, error } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          emailRedirectTo: {},
+          data: {
+            name: formData.name,
+            role: "partner",
+          },
+        },
+      });
       setIsSuccess(true);
-      setMessage("Account created successfully! A verification email has been sent to your email address.");
+      setMessage(
+        "Account created successfully! A verification email has been sent to your email address."
+      );
       setShowConfirmation(true);
     }
   };
-  
+
   const closeConfirmation = () => {
     setShowConfirmation(false);
-    
+
     // Reset form on successful submission
     if (isSuccess) {
       setFormData({
@@ -112,9 +134,9 @@ export default function AuthForm({ mode }: AuthFormProps) {
         email: "",
         password: "",
         confirmPassword: "",
-        remember: false
+        remember: false,
       });
-      
+
       // Redirect to login after successful signup
       if (!isLogin && isSuccess) {
         setIsLogin(true);
@@ -143,15 +165,20 @@ export default function AuthForm({ mode }: AuthFormProps) {
                   </>
                 )}
               </h2>
-              
+
               <p className="text-tifinnity-gray text-base md:text-lg mb-6 md:mb-8">
-                {isLogin ? "Sign in to continue your culinary journey" : "Create an account to get started"}
+                {isLogin
+                  ? "Sign in to continue your culinary journey"
+                  : "Create an account to get started"}
               </p>
-              
+
               <form className="space-y-4 md:space-y-6" onSubmit={handleSubmit}>
                 {!isLogin && (
                   <div className="space-y-2">
-                    <label htmlFor="name" className="text-tifinnity-gray text-sm font-medium">
+                    <label
+                      htmlFor="name"
+                      className="text-tifinnity-gray text-sm font-medium"
+                    >
                       Full Name
                     </label>
                     <input
@@ -159,17 +186,22 @@ export default function AuthForm({ mode }: AuthFormProps) {
                       type="text"
                       placeholder="Enter your name"
                       className={`w-full px-4 py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-tifinnity-green/50 ${
-                        errors.name ? 'border-red-500' : 'border-gray-200'
+                        errors.name ? "border-red-500" : "border-gray-200"
                       }`}
                       value={formData.name}
                       onChange={handleInputChange}
                     />
-                    {errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
+                    {errors.name && (
+                      <p className="text-red-500 text-sm">{errors.name}</p>
+                    )}
                   </div>
                 )}
-                
+
                 <div className="space-y-2">
-                  <label htmlFor="email" className="text-tifinnity-gray text-sm font-medium">
+                  <label
+                    htmlFor="email"
+                    className="text-tifinnity-gray text-sm font-medium"
+                  >
                     Email Address
                   </label>
                   <input
@@ -177,39 +209,51 @@ export default function AuthForm({ mode }: AuthFormProps) {
                     type="email"
                     placeholder="Enter your email"
                     className={`w-full px-4 py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-tifinnity-green/50 ${
-                      errors.email ? 'border-red-500' : 'border-gray-200'
+                      errors.email ? "border-red-500" : "border-gray-200"
                     }`}
                     value={formData.email}
                     onChange={handleInputChange}
                   />
-                  {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
+                  {errors.email && (
+                    <p className="text-red-500 text-sm">{errors.email}</p>
+                  )}
                 </div>
-                
+
                 <div className="space-y-2">
-                  <label htmlFor="password" className="text-tifinnity-gray text-sm font-medium">
+                  <label
+                    htmlFor="password"
+                    className="text-tifinnity-gray text-sm font-medium"
+                  >
                     Password
                   </label>
                   <input
                     id="password"
                     type="password"
-                    placeholder={isLogin ? "Enter your password" : "Create a password"}
+                    placeholder={
+                      isLogin ? "Enter your password" : "Create a password"
+                    }
                     className={`w-full px-4 py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-tifinnity-green/50 ${
-                      errors.password ? 'border-red-500' : 'border-gray-200'
+                      errors.password ? "border-red-500" : "border-gray-200"
                     }`}
                     value={formData.password}
                     onChange={handleInputChange}
                   />
-                  {errors.password && <p className="text-red-500 text-sm">{errors.password}</p>}
+                  {errors.password && (
+                    <p className="text-red-500 text-sm">{errors.password}</p>
+                  )}
                   {isLogin && (
                     <p className="text-sm text-tifinnity-gray">
                       Demo: demo@example.com / password
                     </p>
                   )}
                 </div>
-                
+
                 {!isLogin && (
                   <div className="space-y-2">
-                    <label htmlFor="confirmPassword" className="text-tifinnity-gray text-sm font-medium">
+                    <label
+                      htmlFor="confirmPassword"
+                      className="text-tifinnity-gray text-sm font-medium"
+                    >
                       Confirm Password
                     </label>
                     <input
@@ -217,15 +261,21 @@ export default function AuthForm({ mode }: AuthFormProps) {
                       type="password"
                       placeholder="Confirm your password"
                       className={`w-full px-4 py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-tifinnity-green/50 ${
-                        errors.confirmPassword ? 'border-red-500' : 'border-gray-200'
+                        errors.confirmPassword
+                          ? "border-red-500"
+                          : "border-gray-200"
                       }`}
                       value={formData.confirmPassword}
                       onChange={handleInputChange}
                     />
-                    {errors.confirmPassword && <p className="text-red-500 text-sm">{errors.confirmPassword}</p>}
+                    {errors.confirmPassword && (
+                      <p className="text-red-500 text-sm">
+                        {errors.confirmPassword}
+                      </p>
+                    )}
                   </div>
                 )}
-                
+
                 {isLogin && (
                   <div className="flex justify-between items-center">
                     <div className="flex items-center">
@@ -236,30 +286,38 @@ export default function AuthForm({ mode }: AuthFormProps) {
                         checked={formData.remember}
                         onChange={handleInputChange}
                       />
-                      <label htmlFor="remember" className="ml-2 block text-sm text-tifinnity-gray">
+                      <label
+                        htmlFor="remember"
+                        className="ml-2 block text-sm text-tifinnity-gray"
+                      >
                         Remember me
                       </label>
                     </div>
-                    
-                    <Link href="/auth/forgot-password" className="text-sm text-tifinnity-green hover:underline">
+
+                    <Link
+                      href="/auth/forgot-password"
+                      className="text-sm text-tifinnity-green hover:underline"
+                    >
                       Forgot password?
                     </Link>
                   </div>
                 )}
-                
-                <Button 
-                  type="submit" 
+
+                <Button
+                  type="submit"
                   className="w-full bg-tifinnity-green hover:bg-tifinnity-green/90 text-white py-3 rounded-md transition-colors"
                 >
                   {isLogin ? "Sign In" : "Create Account"}
                 </Button>
               </form>
-              
+
               <div className="mt-6 text-center">
                 <p className="text-tifinnity-gray text-sm">
-                  {isLogin ? "Don't have an account? " : "Already have an account? "}
-                  <Link 
-                    href={isLogin ? "/auth/signup" : "/auth/login"} 
+                  {isLogin
+                    ? "Don't have an account? "
+                    : "Already have an account? "}
+                  <Link
+                    href={isLogin ? "/auth/signup" : "/auth/login"}
                     className="text-tifinnity-green hover:underline font-medium"
                     onClick={(e) => {
                       e.preventDefault();
@@ -271,30 +329,44 @@ export default function AuthForm({ mode }: AuthFormProps) {
                   </Link>
                 </p>
               </div>
-              
+
               <div className="relative my-6">
                 <div className="absolute inset-0 flex items-center">
                   <div className="w-full border-t border-gray-200"></div>
                 </div>
                 <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-white text-tifinnity-gray">Or continue with</span>
+                  <span className="px-2 bg-white text-tifinnity-gray">
+                    Or continue with
+                  </span>
                 </div>
               </div>
-              
+
               <div className="flex justify-center">
                 <Button variant="outline" className="py-2 w-full max-w-xs">
                   <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
-                    <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                    <path fill="currentColor" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                    <path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                    <path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                    <path
+                      fill="currentColor"
+                      d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                    />
+                    <path
+                      fill="currentColor"
+                      d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                    />
+                    <path
+                      fill="currentColor"
+                      d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                    />
+                    <path
+                      fill="currentColor"
+                      d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                    />
                   </svg>
                   Google
                 </Button>
               </div>
             </div>
           </div>
-          
+
           <div className="relative order-1 md:order-2">
             <Image
               src="/landing.png"
@@ -313,41 +385,71 @@ export default function AuthForm({ mode }: AuthFormProps) {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg p-6 max-w-md w-full">
             <div className="flex justify-center mb-4">
-              <div className={`w-16 h-16 rounded-full flex items-center justify-center ${
-                isSuccess ? 'bg-tifinnity-green/20' : 'bg-red-100'
-              }`}>
+              <div
+                className={`w-16 h-16 rounded-full flex items-center justify-center ${
+                  isSuccess ? "bg-tifinnity-green/20" : "bg-red-100"
+                }`}
+              >
                 {isSuccess ? (
-                  <svg className="w-8 h-8 text-tifinnity-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                  <svg
+                    className="w-8 h-8 text-tifinnity-green"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M5 13l4 4L19 7"
+                    ></path>
                   </svg>
                 ) : (
-                  <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
+                  <svg
+                    className="w-8 h-8 text-red-500"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M6 18L18 6M6 6l12 12"
+                    ></path>
                   </svg>
                 )}
               </div>
             </div>
-            
-            <h3 className={`text-2xl font-bold text-center mb-2 ${
-              isSuccess ? 'text-tifinnity-green' : 'text-red-600'
-            }`}>
-              {isSuccess ? (isLogin ? "Login Successful!" : "Account Created!") : "Error"}
+
+            <h3
+              className={`text-2xl font-bold text-center mb-2 ${
+                isSuccess ? "text-tifinnity-green" : "text-red-600"
+              }`}
+            >
+              {isSuccess
+                ? isLogin
+                  ? "Login Successful!"
+                  : "Account Created!"
+                : "Error"}
             </h3>
-            
-            <p className="text-tifinnity-gray text-center mb-6">
-              {message}
-            </p>
-            
+
+            <p className="text-tifinnity-gray text-center mb-6">{message}</p>
+
             <div className="flex justify-center">
-              <Button 
+              <Button
                 onClick={closeConfirmation}
                 className={`${
-                  isSuccess 
-                    ? 'bg-tifinnity-green hover:bg-tifinnity-green/90' 
-                    : 'bg-red-500 hover:bg-red-600'
+                  isSuccess
+                    ? "bg-tifinnity-green hover:bg-tifinnity-green/90"
+                    : "bg-red-500 hover:bg-red-600"
                 } text-white px-6 py-2 rounded-md`}
               >
-                {isSuccess ? (isLogin ? "Continue" : "Go to Login") : "Try Again"}
+                {isSuccess
+                  ? isLogin
+                    ? "Continue"
+                    : "Go to Login"
+                  : "Try Again"}
               </Button>
             </div>
           </div>

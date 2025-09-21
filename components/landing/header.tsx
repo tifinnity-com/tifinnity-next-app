@@ -3,7 +3,6 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ChefHat, Menu, X } from "lucide-react";
 import Link from "next/link";
-
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -11,7 +10,7 @@ export default function Header() {
     { href: "#how-it-works", label: "How it works" },
     { href: "#feature", label: "Features" },
     { href: "#about", label: "About" },
-    { href: "/login", label: "Sign in" },
+    { href: "/auth/signup", label: "Sign in" },
   ];
 
   return (

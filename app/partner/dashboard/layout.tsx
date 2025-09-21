@@ -1,6 +1,5 @@
-import Sidebar from "@/components/partner/sidebar";
+import Navbar from "@/components/partner/navbar";
 import { createClient } from "@/utils/supabase/client";
-import { redirect } from "next/navigation";
 
 export default async function DashboardLayout({
   children,
@@ -20,11 +19,11 @@ export default async function DashboardLayout({
     .single();
 
   // if (profile?.role !== "partner") redirect("/login");
-  console.log(user)
+  console.log(user);
   return (
-    <div className="flex">
-      <Sidebar />
-      <div className="flex-1 p-6">{children}</div>
-    </div>
+    <>
+      <Navbar />
+      {children}
+    </>
   );
 }

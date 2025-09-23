@@ -49,6 +49,7 @@ export default function Navbar() {
     const getUser = async () => {
       const { data } = await supabase.auth.getUser();
       setUser(data.user);
+      console.log("Fetched user:", data.user);
     };
 
     getUser();
@@ -66,12 +67,12 @@ export default function Navbar() {
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    router.push("/login");
+    router.push("/auth/login");
   };
 
   return (
     <header className="bg-card shadow-sm sticky top-0 z-50">
-      <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo and Mobile Menu Trigger */}
           <div className="flex items-center gap-4">
@@ -83,7 +84,7 @@ export default function Navbar() {
                     <span className="sr-only">Open Menu</span>
                   </Button>
                 </SheetTrigger>
-                <SheetContent side="left" className="w-full sm:w-[320px]">
+                <SheetContent side="left" className="w-full sm:w-[320px] px-4">
                   <SheetHeader>
                     <SheetTitle>
                       <Link
@@ -166,7 +167,7 @@ export default function Navbar() {
                 <div className="flex flex-col space-y-1">
                   <p className="text-sm font-medium leading-none">
                     {/* Display fetched user name */}
-                    {user?.user_metadata?.name ?? "Partner"}
+                    {user?.user_metadata?.full_name ?? "Partner"}
                   </p>
                   <p className="text-xs leading-none text-muted-foreground">
                     {/* Display fetched user email */}

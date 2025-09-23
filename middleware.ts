@@ -21,13 +21,13 @@ export async function middleware(req: NextRequest) {
   );
 
   const {
-    data: { session },
-  } = await supabase.auth.getSession();
-  const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const role = session?.user?.user_metadata?.role;
+  const role = user?.user_metadata.role;
+  if (!user || !role) {
+    return NextResponse.redirect(new URL("/auth/login", req.url));
+  }
   const pathname = req.nextUrl.pathname;
 
   // Role-based access control
@@ -37,7 +37,7 @@ export async function middleware(req: NextRequest) {
     );
   }
 
-  if (pathname.startsWith("/student") && role !== "student") {
+  if (pathname.startsWith("/customer") && role !== "student") {
     return NextResponse.redirect(
       new URL("/unauthorized?reason=student", req.url)
     );
@@ -47,5 +47,5 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/partner/:path*", "/student/:path*"],
+  matcher: ["/partner/:path*", "/customer/:path*"],
 };

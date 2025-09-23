@@ -5,7 +5,8 @@ import { useEffect, useState, createContext, useContext } from "react";
 type Profile = {
   id: string;
   name: string | null;
-  avatar_url: string | null;
+  email: string | null;
+  role: "partner" | "student";
 };
 
 type AuthContextType = {

@@ -1,7 +1,7 @@
 "use client";
 
-import AnalyticsDashboard from "@/components/partner/analytics-dashboard";
+import VendorAnalytics from "@/components/partner/vendor-analytics";
 
 export default function DashboardPage() {
-  return <AnalyticsDashboard />;
+  return <VendorAnalytics />;
 }

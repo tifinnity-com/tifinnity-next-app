@@ -4,7 +4,7 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --background: #f5f5dc; /* Warm beige background */
+  --background: #ffff; /* Warm beige background */
   --foreground: #2c2c2c; /* Dark text */
   --card: #ffffff; /* White cards */
   --card-foreground: #2c2c2c;
@@ -142,7 +142,7 @@
   }
 
   .bg-tifinnity-cream {
-    background-color: #f5f5dc;
+    background-color: #ffffff;
   }
 
   .text-tifinnity-gray {

@@ -1,109 +1,251 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { createClient } from "@/utils/supabase/client";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  MoreHorizontal,
+  CheckCircle,
+  XCircle,
+  ShoppingCart,
+} from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import toast from "react-hot-toast";
 
 type Order = {
   id: string;
+  created_at: string;
   total_amount: number;
   status: "placed" | "delivered" | "cancelled";
-  mess_id: string;
-  mess_menus: {
-    item_name: string;
-  } | null;
-  users: {
-    name: string;
-  } | null;
+  users: { name: string; phone: string } | null;
+  mess_menus: { item_name: string } | null;
 };
 
 export default function OrderManagement() {
   const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState("all");
   const supabase: SupabaseClient = createClient();
 
   useEffect(() => {
     const fetchOrders = async () => {
+      setLoading(true);
       const {
         data: { user },
       } = await supabase.auth.getUser();
-      if (!user) return;
+      if (!user) {
+        setLoading(false);
+        return;
+      }
 
       const { data: mess } = await supabase
         .from("messes")
         .select("id")
         .eq("vendor_id", user.id)
         .single();
+      if (!mess?.id) {
+        setLoading(false);
+        return;
+      }
 
-      if (!mess?.id) return;
-
-      const { data: orderData } = await supabase
+      const { data, error } = await supabase
         .from("orders")
-        .select("*, mess_menus(item_name), users(name)")
-        .eq("mess_id", mess.id);
+        .select(
+          "id, created_at, total_amount, status, users(name, phone), mess_menus(item_name)"
+        )
+        .eq("mess_id", mess.id)
+        .order("created_at", { ascending: false })
+        .returns<Order[]>();
 
-      if (orderData) setOrders(orderData as Order[]);
+      if (error) {
+        toast.error("Failed to fetch orders.");
+        console.error("Error fetching orders:", error);
+      } else {
+        setOrders(data as Order[]);
+      }
+      setLoading(false);
     };
 
     fetchOrders();
-
-    const channel = supabase
-      .channel("orders")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "orders" },
-        () => {
-          fetchOrders();
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
   }, [supabase]);
 
   const updateStatus = async (id: string, status: Order["status"]) => {
-    await supabase.from("orders").update({ status }).eq("id", id);
+    const { error } = await supabase
+      .from("orders")
+      .update({ status })
+      .eq("id", id);
+    if (error) {
+      toast.error("Failed to update order status.");
+    } else {
+      setOrders(orders.map((o) => (o.id === id ? { ...o, status } : o)));
+      toast.success(`Order marked as ${status}.`);
+    }
+  };
+
+  const filteredOrders = useMemo(() => {
+    if (filter === "all") return orders;
+    return orders.filter((order) => order.status === filter);
+  }, [orders, filter]);
+
+  const getStatusVariant = (status: Order["status"]) => {
+    if (status === "delivered") return "secondary";
+    if (status === "cancelled") return "destructive";
+    return "default";
   };
 
   return (
-    <div className="p-6">
-      <h2 className="text-2xl mb-4">Order Management</h2>
-      <table className="w-full border">
-        <thead>
-          <tr>
-            <th className="border p-2">User</th>
-            <th className="border p-2">Item</th>
-            <th className="border p-2">Amount</th>
-            <th className="border p-2">Status</th>
-            <th className="border p-2">Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          {orders.map((order) => (
-            <tr key={order.id}>
-              <td className="border p-2">{order.users?.name ?? "—"}</td>
-              <td className="border p-2">
-                {order.mess_menus?.item_name ?? "—"}
-              </td>
-              <td className="border p-2">{order.total_amount}</td>
-              <td className="border p-2">{order.status}</td>
-              <td className="border p-2">
-                <select
-                  onChange={(e) =>
-                    updateStatus(order.id, e.target.value as Order["status"])
-                  }
-                  value={order.status}
-                  className="p-1 border rounded"
-                >
-                  <option value="placed">Placed</option>
-                  <option value="delivered">Delivered</option>
-                  <option value="cancelled">Cancelled</option>
-                </select>
-              </td>
-            </tr>
+    <div className="container max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+      <Card>
+        <CardHeader>
+          <CardTitle>Order Management</CardTitle>
+          <CardDescription>
+            View and manage incoming customer orders.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Tabs value={filter} onValueChange={setFilter} className="mb-4">
+            <TabsList>
+              <TabsTrigger value="all">All</TabsTrigger>
+              <TabsTrigger value="placed">Placed</TabsTrigger>
+              <TabsTrigger value="delivered">Delivered</TabsTrigger>
+              <TabsTrigger value="cancelled">Cancelled</TabsTrigger>
+            </TabsList>
+          </Tabs>
+          {loading ? (
+            <OrderTableSkeleton />
+          ) : filteredOrders.length === 0 ? (
+            <div className="text-center py-12 border-dashed border-2 rounded-lg">
+              <ShoppingCart className="mx-auto h-12 w-12 text-gray-400" />
+              <h3 className="mt-4 text-xl font-semibold">No Orders Found</h3>
+              <p className="mt-1 text-sm text-muted-foreground">
+                There are no orders with the status: {filter}
+              </p>
+            </div>
+          ) : (
+            <div className="rounded-md border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Customer</TableHead>
+                    <TableHead>Order Details</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredOrders.map((order) => (
+                    <TableRow key={order.id}>
+                      <TableCell>
+                        <div className="font-medium">
+                          {order.users?.name ?? "N/A"}
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          {order.users?.phone ?? ""}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div>{order.mess_menus?.item_name ?? "N/A"}</div>
+                        <div className="text-sm font-bold">
+                          ₹{order.total_amount.toFixed(2)}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        {new Date(order.created_at).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={getStatusVariant(order.status)}>
+                          {order.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="h-8 w-8 p-0">
+                              <span className="sr-only">Open menu</span>
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                              onClick={() =>
+                                updateStatus(order.id, "delivered")
+                              }
+                            >
+                              <CheckCircle className="mr-2 h-4 w-4" /> Mark as
+                              Delivered
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() =>
+                                updateStatus(order.id, "cancelled")
+                              }
+                              className="text-red-500"
+                            >
+                              <XCircle className="mr-2 h-4 w-4" /> Cancel Order
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+function OrderTableSkeleton() {
+  return (
+    <div className="rounded-md border">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            {[...Array(5)].map((_, i) => (
+              <TableHead key={i}>
+                <Skeleton className="h-5 w-full" />
+              </TableHead>
+            ))}
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {[...Array(5)].map((_, i) => (
+            <TableRow key={i}>
+              {[...Array(5)].map((_, j) => (
+                <TableCell key={j}>
+                  <Skeleton className="h-5 w-full" />
+                </TableCell>
+              ))}
+            </TableRow>
           ))}
-        </tbody>
-      </table>
+        </TableBody>
+      </Table>
     </div>
   );
 }

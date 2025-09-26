@@ -1,5 +1,5 @@
-import AuthPage from "@/components/landing/auth-page";
+import { LoginForm } from "@/components/auth/login-form";
 
 export default function Login() {
-  return <AuthPage mode="login" />;
+  return <LoginForm />;
 }

@@ -1,5 +1,6 @@
 import Navbar from "@/components/partner/navbar";
 import { createClient } from "@/utils/supabase/client";
+import { redirect } from "next/navigation";
 
 export default async function DashboardLayout({
   children,
@@ -10,7 +11,7 @@ export default async function DashboardLayout({
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  // if (!user) redirect("/login");
+  if (!user) redirect("/auth/login");
 
   const { data: profile } = await supabase
     .from("users")
@@ -18,12 +19,12 @@ export default async function DashboardLayout({
     .eq("id", user?.id)
     .single();
 
-  // if (profile?.role !== "partner") redirect("/login");
-  console.log(user);
+  if (profile?.role !== "partner") redirect("/auth/login");
+
   return (
     <>
       <Navbar />
-      {children}
+      <main className="p-4 sm:p-6 lg:p-8">{children}</main>
     </>
   );
 }

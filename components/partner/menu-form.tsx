@@ -301,7 +301,7 @@ export default function MenuManagementPage() {
                 Fill in the details for the menu item below.
               </SheetDescription>
             </SheetHeader>
-            <div className="py-6 space-y-4">
+            <div className="p-6 space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="item_name">Item Name</Label>
                 <Input

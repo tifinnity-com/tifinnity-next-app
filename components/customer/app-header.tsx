@@ -64,7 +64,7 @@ export default function AppHeader() {
   );
 
   const MobileNav = () => (
-    <div className="flex  flex-col space-y-2 pt-6 text-lg">
+    <div className="flex  flex-col space-y-2 pt-6 text-lg pb-4 p-3">
       {navItems.map((item) => (
         <SheetClose asChild key={item.href}>
           <Link

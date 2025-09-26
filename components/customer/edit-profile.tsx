@@ -80,7 +80,7 @@ export default function EditProfile() {
 
       const { data: profileData } = await supabase
         .from("users")
-        .select("name, phone, avatar_url")
+        .select("*")
         .eq("id", user.id)
         .single();
 

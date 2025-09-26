@@ -46,15 +46,16 @@ export default function Profile() {
         data: { user },
       } = await supabase.auth.getUser();
 
+      console.log("user", user);
+
       if (user) {
         const { data: profileData, error: profileError } = await supabase
           .from("users")
-          .select("name, email, phone, avatar_url")
+          .select("name, email, phone")
           .eq("id", user.id)
           .single();
 
-        if (profileError)
-          console.error("Error fetching profile:", profileError);
+        if (profileError) console.log("Error fetching profile:", profileError);
         else setProfile(profileData as UserProfile);
 
         const { data: addressData, error: addressError } = await supabase

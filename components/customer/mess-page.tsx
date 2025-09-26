@@ -18,6 +18,7 @@ import Image from "next/image";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
+import toast from "react-hot-toast";
 
 interface Mess {
   id: string;
@@ -121,6 +122,44 @@ export default function MessDetailPage({ messId }: { messId: string }) {
       </div>
     );
   }
+
+  const proceedSubscription = async (messId: string, plan: string) => {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) return;
+
+    const end_date = new Date();
+
+    if (plan == "daily") {
+      end_date.setDate(end_date.getDate() + 1);
+    } else if (plan == "weekly") {
+      end_date.setDate(end_date.getDate() + 7);
+    } else if (plan == "monthly") {
+      end_date.setMonth(end_date.getMonth() + 1);
+    }
+    const { data: subscription, error } = await supabase
+      .from("subscriptions")
+      .insert({
+        user_id: user.id,
+        mess_id: messId,
+        subscription_type: plan,
+        start_date: new Date().toISOString(),
+        end_date: end_date.toISOString(),
+        status: "active",
+      });
+
+    if (subscription) {
+      toast.success("Subscription created successfully!");
+    } else {
+      toast.error("Error creating subscription.");
+    }
+
+    if (error) {
+      console.error("Error creating subscription:", error);
+    }
+  };
 
   return (
     <div className="container max-w-7xl mx-auto p-4 md:p-6">
@@ -297,7 +336,12 @@ export default function MessDetailPage({ messId }: { messId: string }) {
                       {selectedPlan}
                     </span>
                   </div>
-                  <Button asChild size="lg" className="w-full">
+                  <Button
+                    asChild
+                    size="lg"
+                    className="w-full"
+                    onClick={() => proceedSubscription(messId, selectedPlan)}
+                  >
                     <Link
                       href={`/customer/subscriptions?mess_id=${messId}&plan=${selectedPlan}`}
                     >

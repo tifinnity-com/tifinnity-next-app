@@ -1,19 +1,53 @@
-import { createServerClient } from "@supabase/ssr";
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
+import { createServerClient, type CookieOptions } from "@supabase/ssr";
+import { NextResponse, type NextRequest } from "next/server";
 
-export async function middleware(req: NextRequest) {
-  const res = NextResponse.next();
+export async function middleware(request: NextRequest) {
+  let response = NextResponse.next({
+    request: {
+      headers: request.headers,
+    },
+  });
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        getAll: () => req.cookies.getAll(),
-        setAll: (cookiesToSet) => {
-          cookiesToSet.forEach(({ name, value, options }) => {
-            res.cookies.set(name, value, options);
+        get(name: string) {
+          return request.cookies.get(name)?.value;
+        },
+        set(name: string, value: string, options: CookieOptions) {
+          request.cookies.set({
+            name,
+            value,
+            ...options,
+          });
+          response = NextResponse.next({
+            request: {
+              headers: request.headers,
+            },
+          });
+          response.cookies.set({
+            name,
+            value,
+            ...options,
+          });
+        },
+        remove(name: string, options: CookieOptions) {
+          request.cookies.set({
+            name,
+            value: "",
+            ...options,
+          });
+          response = NextResponse.next({
+            request: {
+              headers: request.headers,
+            },
+          });
+          response.cookies.set({
+            name,
+            value: "",
+            ...options,
           });
         },
       },
@@ -26,24 +60,24 @@ export async function middleware(req: NextRequest) {
 
   const role = user?.user_metadata.role;
   if (!user || !role) {
-    return NextResponse.redirect(new URL("/auth/login", req.url));
+    return NextResponse.redirect(new URL("/auth/login", request.url));
   }
-  const pathname = req.nextUrl.pathname;
+  const pathname = request.nextUrl.pathname;
 
   // Role-based access control
   if (pathname.startsWith("/partner") && role !== "partner") {
     return NextResponse.redirect(
-      new URL("/unauthorized?reason=partner", req.url)
+      new URL("/unauthorized?reason=partner", request.url)
     );
   }
 
   if (pathname.startsWith("/customer") && role !== "student") {
     return NextResponse.redirect(
-      new URL("/unauthorized?reason=student", req.url)
+      new URL("/unauthorized?reason=student", request.url)
     );
   }
 
-  return res;
+  return response;
 }
 
 export const config = {

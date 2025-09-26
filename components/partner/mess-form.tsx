@@ -98,6 +98,7 @@ export default function ManageMessPage() {
     const {
       data: { user },
     } = await supabase.auth.getUser();
+    console.log(user);
     if (!user) {
       toast.error("You must be logged in.");
       setIsSaving(false);
@@ -108,9 +109,11 @@ export default function ManageMessPage() {
 
     if (formState.imageFile) {
       const filePath = `public/mess-${user.id}-${Date.now()}.jpg`;
-      const { error: uploadError } = await supabase.storage
+      const { data, error: uploadError } = await supabase.storage
         .from("mess-images")
         .upload(filePath, formState.imageFile, { upsert: true });
+      console.log("upload data", data);
+      console.log("upload error", uploadError);
 
       if (uploadError) {
         toast.error("Image upload failed: " + uploadError.message);

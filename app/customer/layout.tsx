@@ -8,7 +8,7 @@ export default async function StudentLayout({
 }: {
   children: ReactNode;
 }) {
-  const supabase = await createClient();
+  const supabase = createClient();
 
   const {
     data: { user },

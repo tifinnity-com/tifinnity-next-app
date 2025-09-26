@@ -22,7 +22,7 @@ export default async function StudentLayout({
   return (
     <div className="flex flex-col min-h-screen">
       <AppHeader />
-      <main className="flex-1 p-6">{children}</main>
+      <main>{children}</main>
     </div>
   );
 }

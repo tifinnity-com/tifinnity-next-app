@@ -1,6 +1,9 @@
-import OrderForm from "@/components/customer/order-form";
-import React from "react";
+import OrdersHistory from "@/components/customer/orders-history";
 
 export default function OrdersPage() {
-  return <OrderForm />;
+  return (
+    <div className="container mx-auto p-6">
+      <OrdersHistory />
+    </div>
+  );
 }

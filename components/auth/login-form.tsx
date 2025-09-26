@@ -277,7 +277,7 @@ export function LoginForm() {
 
         <div className="relative order-1 md:order-2">
           <Image
-            src="/landing.jpeg"
+            src="/landing.jpg"
             alt="Person enjoying home-cooked meal"
             className="rounded-xl w-full object-cover aspect-[4/3] md:aspect-auto"
             width={600}

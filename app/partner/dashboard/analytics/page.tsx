@@ -1,6 +1,5 @@
-import VendorAnalytics from "@/components/partner/vendor-analytics";
-import React from "react";
+import AnalyticsDashboard from "@/components/partner/analytics-dashboard";
 
 export default function AnalyticsPage() {
-  return <VendorAnalytics />;
+  return <AnalyticsDashboard />;
 }

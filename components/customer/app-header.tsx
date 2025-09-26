@@ -46,7 +46,7 @@ export default function AppHeader() {
           className={cn(
             "transition-colors hover:text-tifinnity-green",
             pathname === item.href
-              ? "text-tifinnity-green font-semibold"
+              ? "text-tifinnity-green font-bold"
               : "text-muted-foreground"
           )}
         >
@@ -97,7 +97,7 @@ export default function AppHeader() {
       initial={{ y: -100, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.5, ease: "easeInOut" }}
-      className="sticky top-0 z-50 w-full border-b"
+      className="sticky top-0 z-50 w-full   border-b"
     >
       <div className="container  flex h-16 max-w-7xl items-center justify-between mx-auto px-4 sm:px-6 lg:px-8">
         <Link

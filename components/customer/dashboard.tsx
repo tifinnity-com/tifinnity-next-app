@@ -21,7 +21,7 @@ export default async function StudentDashboard() {
     .eq("status", "active");
 
   return (
-    <div className="container mx-auto">
+    <div className="container max-w-7xl mx-auto">
       <h1 className="text-3xl mb-6">Welcome, {user?.email}</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="p-4 bg-blue-100 rounded">

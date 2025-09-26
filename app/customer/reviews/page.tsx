@@ -1,4 +1,4 @@
-import ReviewManagement from "@/components/partner/review-table";
+import ReviewManagement from "@/components/customer/reviews";
 import React from "react";
 
 export default function ReviewPage() {

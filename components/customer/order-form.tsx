@@ -140,7 +140,7 @@ export default function OrderForm() {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="container mx-auto p-6"
+      className="container max-w-7xl mx-auto p-6"
     >
       <Card>
         <CardHeader>

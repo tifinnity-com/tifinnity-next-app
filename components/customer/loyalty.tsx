@@ -1,80 +1,92 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { createClient } from "@/utils/supabase/client";
+import { Gift, Medal, Trophy } from "lucide-react";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 export default async function LoyaltyPage() {
   const supabase = createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
   const { data: points } = await supabase
     .from("loyalty_points")
     .select("id, points, reason, created_at")
-    .eq("user_id", user?.id);
+    .eq("user_id", user?.id)
+    .order("created_at", { ascending: false });
+
   const { data: referrals } = await supabase
     .from("referrals")
     .select("id, points_awarded, created_at")
-    .eq("referrer_id", user?.id);
+    .eq("referrer_id", user?.id)
+    .order("created_at", { ascending: false });
+
   const totalPoints = points?.reduce((sum, p) => sum + p.points, 0) || 0;
 
   return (
-    <div className="container mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-6 text-orange-600">Your Rewards</h1>
-      <Card className="mb-6 bg-orange-50">
+    <div className="container max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold tracking-tight">Your Rewards</h1>
+        <p className="text-muted-foreground">Track your points and referral bonuses.</p>
+      </div>
+      <Card className="mb-6 bg-gradient-to-r from-primary to-primary/80 text-primary-foreground">
         <CardHeader>
-          <CardTitle>Total Points: {totalPoints}</CardTitle>
+          <CardTitle className="flex items-center gap-2"><Trophy /> Total Points</CardTitle>
         </CardHeader>
         <CardContent>
-          <p>Earn points with every tiffin order and referral!</p>
+          <p className="text-5xl font-bold">{totalPoints}</p>
+          <p className="mt-2 text-primary-foreground/80">Earn points with every tiffin order and referral!</p>
         </CardContent>
       </Card>
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle>Points History</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <table className="w-full border">
-            <thead>
-              <tr>
-                <th className="border p-2">Points</th>
-                <th className="border p-2">Reason</th>
-                <th className="border p-2">Date</th>
-              </tr>
-            </thead>
-            <tbody>
-              {points?.map((point) => (
-                <tr key={point.id}>
-                  <td className="border p-2">{point.points}</td>
-                  <td className="border p-2">{point.reason}</td>
-                  <td className="border p-2">{point.created_at}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </CardContent>
-      </Card>
-      <Card>
-        <CardHeader>
-          <CardTitle>Referrals</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <table className="w-full border">
-            <thead>
-              <tr>
-                <th className="border p-2">Points Awarded</th>
-                <th className="border p-2">Date</th>
-              </tr>
-            </thead>
-            <tbody>
-              {referrals?.map((referral) => (
-                <tr key={referral.id}>
-                  <td className="border p-2">{referral.points_awarded}</td>
-                  <td className="border p-2">{referral.created_at}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </CardContent>
-      </Card>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2"><Medal /> Points History</CardTitle>
+            <CardDescription>Detailed log of your earned points.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Points</TableHead>
+                  <TableHead>Reason</TableHead>
+                  <TableHead className="text-right">Date</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {points?.map((point) => (
+                  <TableRow key={point.id}>
+                    <TableCell className="font-bold">{point.points}</TableCell>
+                    <TableCell>{point.reason}</TableCell>
+                    <TableCell className="text-right">{new Date(point.created_at).toLocaleDateString()}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2"><Gift /> Referrals</CardTitle>
+            <CardDescription>Bonuses from your referred friends.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Points Awarded</TableHead>
+                  <TableHead className="text-right">Date</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {referrals?.map((referral) => (
+                  <TableRow key={referral.id}>
+                    <TableCell className="font-bold">{referral.points_awarded}</TableCell>
+                    <TableCell className="text-right">{new Date(referral.created_at).toLocaleDateString()}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

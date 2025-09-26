@@ -1,12 +1,6 @@
 "use client";
-import { useState, useEffect, useMemo, FormEvent } from "react";
-import { createClient } from "@/utils/supabase/client";
-import type { SupabaseClient, PostgrestError } from "@supabase/supabase-js";
-import { format } from "date-fns";
-
-// UI Components from shadcn/ui
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -57,7 +51,13 @@ import {
   Loader2,
   Trash2,
   Pencil,
+  UtensilsCrossed,
 } from "lucide-react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
+import { createClient } from "@/utils/supabase/client";
+import { format } from "date-fns";
+import toast from "react-hot-toast";
+import { SupabaseClient } from "@supabase/supabase-js";
 
 type MenuItem = {
   id: string;
@@ -77,11 +77,9 @@ export default function MenuManagementPage() {
   const [itemToDelete, setItemToDelete] = useState<MenuItem | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<PostgrestError | null>(null);
 
   const supabase: SupabaseClient = createClient();
 
-  // --- DATA FETCHING & REAL-TIME SUBSCRIPTION ---
   useEffect(() => {
     const setup = async () => {
       setIsLoading(true);
@@ -108,56 +106,24 @@ export default function MenuManagementPage() {
           .order("menu_date", { ascending: false });
 
         if (data) setMenus(data);
-        if (error) setError(error);
+        if (error) toast.error("Failed to fetch menu items.");
       }
       setIsLoading(false);
     };
 
     setup();
-
-    const channel = supabase
-      .channel("mess_menus_changes")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "mess_menus" },
-        (payload) => {
-          // A more efficient way to handle updates without a full refetch
-          if (payload.eventType === "INSERT") {
-            setMenus((current) => [...current, payload.new as MenuItem]);
-          }
-          if (payload.eventType === "UPDATE") {
-            setMenus((current) =>
-              current.map((item) =>
-                item.id === payload.new.id ? (payload.new as MenuItem) : item
-              )
-            );
-          }
-          if (payload.eventType === "DELETE") {
-            setMenus((current) =>
-              current.filter((item) => item.id !== payload.old.id)
-            );
-          }
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
   }, [supabase]);
 
-  // Group menus by date for a better display
   const groupedMenus = useMemo(() => {
     return menus.reduce((acc: { [key: string]: MenuItem[] }, menu) => {
-      const date = format(new Date(menu.menu_date), "PPP"); // e.g., "September 23rd, 2025"
+      const date = format(new Date(menu.menu_date), "PPP");
       if (!acc[date]) acc[date] = [];
       acc[date].push(menu);
       return acc;
     }, {});
   }, [menus]);
 
-  // --- CRUD OPERATIONS ---
-  const handleFormSubmit = async (e: FormEvent) => {
+  const handleFormSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!editingItem || !messId) return;
 
@@ -171,103 +137,102 @@ export default function MenuManagementPage() {
     };
 
     const promise = id
-      ? supabase.from("mess_menus").update(payload).eq("id", id)
-      : supabase.from("mess_menus").insert(payload);
+      ? supabase
+          .from("mess_menus")
+          .update(payload)
+          .eq("id", id)
+          .select()
+          .single()
+      : supabase.from("mess_menus").insert(payload).select().single();
 
-    const { error } = await promise;
+    const { data, error } = await promise;
+
     if (error) {
-      alert("Error saving item: " + error.message);
-    } else {
-      setEditingItem(null); // Close the sheet on success
+      toast.error("Error saving item: " + error.message);
+    } else if (data) {
+      if (id) {
+        setMenus(menus.map((m) => (m.id === id ? data : m)));
+      } else {
+        setMenus([data, ...menus]);
+      }
+      setEditingItem(null);
+      toast.success("Menu item saved!");
     }
     setIsSubmitting(false);
   };
 
   const handleToggleAvailability = async (item: MenuItem) => {
-    await supabase
+    const { error } = await supabase
       .from("mess_menus")
       .update({ available: !item.available })
       .eq("id", item.id);
+    if (error) {
+      toast.error("Failed to update status.");
+    } else {
+      setMenus(
+        menus.map((m) =>
+          m.id === item.id ? { ...m, available: !m.available } : m
+        )
+      );
+      toast.success("Status updated.");
+    }
   };
 
   const handleDelete = async () => {
     if (!itemToDelete) return;
-    await supabase.from("mess_menus").delete().eq("id", itemToDelete.id);
+    const { error } = await supabase
+      .from("mess_menus")
+      .delete()
+      .eq("id", itemToDelete.id);
+    if (error) {
+      toast.error("Failed to delete item.");
+    } else {
+      setMenus(menus.filter((m) => m.id !== itemToDelete.id));
+      toast.success("Menu item deleted.");
+    }
     setItemToDelete(null);
   };
 
-  // --- RENDER LOGIC ---
   return (
-    <div className="bg-gray-50/50 min-h-screen p-4 sm:p-6 lg:p-8">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">
-              Menu Management
-            </h1>
-            <p className="text-gray-500 mt-1">
-              Add, edit, and manage your daily menu items.
-            </p>
-          </div>
-          <Button size="lg" onClick={() => setEditingItem({})}>
-            <PlusCircle className="mr-2 h-5 w-5" /> Add New Item
-          </Button>
+    <div className="container max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Menu Management</h1>
+          <p className="text-muted-foreground mt-1">
+            Manage your daily menu items.
+          </p>
         </div>
+        <Button
+          size="lg"
+          onClick={() =>
+            setEditingItem({
+              available: true,
+              menu_date: new Date().toISOString(),
+            })
+          }
+        >
+          <PlusCircle className="mr-2 h-5 w-5" /> Add New Item
+        </Button>
+      </div>
 
-        {/* Loading Skeleton */}
-        {isLoading && (
-          <div className="space-y-4">
-            <Skeleton className="h-12 w-1/4" />
-            <Skeleton className="h-24 w-full" />
-            <Skeleton className="h-24 w-full" />
-          </div>
-        )}
-
-        {/* Menu List */}
-        {!isLoading && Object.keys(groupedMenus).length === 0 && (
-          <div className="text-center py-20 border-2 border-dashed rounded-lg">
-            <h3 className="text-xl font-semibold text-gray-700">
-              No menu items yet.
-            </h3>
-            <p className="text-gray-500 mt-2">
-              Click &quot;Add New Item&quot; to get started!
-            </p>
-          </div>
-        )}
-
+      {isLoading ? (
+        <MenuSkeleton />
+      ) : Object.keys(groupedMenus).length === 0 ? (
+        <Card className="text-center py-20 border-2 border-dashed bg-muted/20">
+          <UtensilsCrossed className="mx-auto h-12 w-12 text-gray-400" />
+          <h3 className="mt-4 text-xl font-semibold">No menu items found</h3>
+          <p className="text-muted-foreground mt-2">
+            Click &quot;Add New Item&quot; to build your menu.
+          </p>
+        </Card>
+      ) : (
         <div className="space-y-8">
           {Object.entries(groupedMenus).map(([date, items]) => (
-            <div key={date}>
-              <h2 className="text-xl font-semibold text-gray-800 mb-3">
-                {date}
-              </h2>
-              {/* Cards for Mobile */}
-              <div className="grid gap-4 sm:hidden">
-                {items.map((item) => (
-                  <Card key={item.id} className="shadow-sm">
-                    <CardContent className="p-4 flex justify-between items-center">
-                      <div>
-                        <p className="font-semibold">{item.item_name}</p>
-                        <p className="text-sm text-gray-600">₹{item.price}</p>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <Switch
-                          checked={item.available}
-                          onCheckedChange={() => handleToggleAvailability(item)}
-                        />
-                        <ItemActionsDropdown
-                          item={item}
-                          setEditingItem={setEditingItem}
-                          setItemToDelete={setItemToDelete}
-                        />
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-              {/* Table for Desktop */}
-              <Card className="hidden sm:block shadow-sm">
+            <Card key={date}>
+              <CardHeader>
+                <CardTitle>{date}</CardTitle>
+              </CardHeader>
+              <CardContent>
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -316,13 +281,12 @@ export default function MenuManagementPage() {
                     ))}
                   </TableBody>
                 </Table>
-              </Card>
-            </div>
+              </CardContent>
+            </Card>
           ))}
         </div>
-      </div>
+      )}
 
-      {/* Add/Edit Sheet */}
       <Sheet
         open={!!editingItem}
         onOpenChange={(open) => !open && setEditingItem(null)}
@@ -414,7 +378,7 @@ export default function MenuManagementPage() {
               <Button type="submit" disabled={isSubmitting}>
                 {isSubmitting && (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                )}
+                )}{" "}
                 Save Item
               </Button>
             </SheetFooter>
@@ -422,7 +386,6 @@ export default function MenuManagementPage() {
         </SheetContent>
       </Sheet>
 
-      {/* Delete Confirmation Dialog */}
       <AlertDialog
         open={!!itemToDelete}
         onOpenChange={(open) => !open && setItemToDelete(null)}
@@ -439,7 +402,7 @@ export default function MenuManagementPage() {
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
-              className="bg-red-600 hover:bg-red-700"
+              className="bg-destructive hover:bg-destructive/90"
             >
               Delete
             </AlertDialogAction>
@@ -450,7 +413,6 @@ export default function MenuManagementPage() {
   );
 }
 
-// --- HELPER COMPONENT FOR ACTIONS ---
 function ItemActionsDropdown({
   item,
   setEditingItem,
@@ -482,5 +444,29 @@ function ItemActionsDropdown({
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
+  );
+}
+
+function MenuSkeleton() {
+  return (
+    <div className="space-y-8">
+      <Card>
+        <CardHeader>
+          <Skeleton className="h-8 w-1/4" />
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-10 w-full" />
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader>
+          <Skeleton className="h-8 w-1/4" />
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Skeleton className="h-10 w-full" />
+        </CardContent>
+      </Card>
+    </div>
   );
 }

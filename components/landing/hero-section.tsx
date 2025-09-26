@@ -15,7 +15,7 @@ export default function HeroSection() {
           <p className="text-tifinnity-gray text-base md:text-lg mb-6 md:mb-8">
             Your mess, your meal, your home away from home.
           </p>
-          <Link href="/signup">
+          <Link href="/auth/signup/student">
             <Button className="bg-tifinnity-green hover:bg-tifinnity-green/90 text-white px-6 py-3 md:px-8 md:py-3 rounded-md transition-colors">
               Get Started
             </Button>

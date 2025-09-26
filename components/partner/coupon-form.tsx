@@ -122,6 +122,7 @@ export default function CouponManagement() {
       : supabase.from("coupons").insert(payload).select().single();
 
     const { data, error } = await promise;
+    console.log({ data, error });
 
     if (error) {
       toast.error(`Failed to ${formData.id ? "update" : "create"} coupon.`);

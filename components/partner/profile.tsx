@@ -28,16 +28,19 @@ export default function PartnerProfile() {
   useEffect(() => {
     const fetchProfile = async () => {
       setLoading(true);
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
       if (user) {
         const { data: profileData, error: profileError } = await supabase
           .from("users")
-          .select("name, email, avatar_url")
+          .select("*")
           .eq("id", user.id)
           .single();
 
-        if (profileError) console.error("Error fetching profile:", profileError);
+        if (profileError)
+          console.error("Error fetching profile:", profileError);
         else setProfile(profileData as UserProfile);
       }
       setLoading(false);
@@ -63,8 +66,12 @@ export default function PartnerProfile() {
               <AvatarFallback>{profile.name?.[0]}</AvatarFallback>
             </Avatar>
             <div className="flex-1 text-center sm:text-left">
-              <CardTitle className="text-3xl font-bold">{profile.name}</CardTitle>
-              <CardDescription className="text-lg text-muted-foreground">{profile.email}</CardDescription>
+              <CardTitle className="text-3xl font-bold">
+                {profile.name}
+              </CardTitle>
+              <CardDescription className="text-lg text-muted-foreground">
+                {profile.email}
+              </CardDescription>
             </div>
             <Button asChild variant="outline">
               <Link href="/partner/dashboard/settings">Edit Profile</Link>
@@ -72,7 +79,10 @@ export default function PartnerProfile() {
           </div>
         </CardHeader>
         <CardContent className="p-6 text-center">
-            <p className="text-muted-foreground">This is your partner profile page. You can edit your details in the settings.</p>
+          <p className="text-muted-foreground">
+            This is your partner profile page. You can edit your details in the
+            settings.
+          </p>
         </CardContent>
       </Card>
     </div>
@@ -94,9 +104,9 @@ function ProfileSkeleton() {
           </div>
         </CardHeader>
         <CardContent className="p-6 text-center">
-            <Skeleton className="h-5 w-3/4 mx-auto" />
+          <Skeleton className="h-5 w-3/4 mx-auto" />
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

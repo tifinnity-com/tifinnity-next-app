@@ -167,6 +167,7 @@ export function LoginForm() {
                   value={formData.email}
                   onChange={handleInputChange}
                   disabled={isLoading}
+                  autoComplete="email"
                 />
                 {errors.email && (
                   <p className="text-red-500 text-sm">{errors.email}</p>
@@ -192,6 +193,7 @@ export function LoginForm() {
                   value={formData.password}
                   onChange={handleInputChange}
                   disabled={isLoading}
+                  autoComplete="current-password"
                 />
                 {errors.password && (
                   <p className="text-red-500 text-sm">{errors.password}</p>

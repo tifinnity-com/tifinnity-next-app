@@ -34,7 +34,7 @@ function HeroSection({
   setSearchQuery: (query: string) => void;
 }) {
   return (
-    <div className="relative mb-12 text-center py-16 sm:py-24 rounded-lg overflow-hidden">
+    <div className="relative flex flex-col items-center justify-center mb-12 text-center py-16 sm:py-24 rounded-lg overflow-hidden">
       {/* Background Image with a darkening overlay for better text readability */}
       <Image
         src="/landing.jpg"
@@ -52,10 +52,10 @@ function HeroSection({
         <p className="mt-4 text-lg text-gray-100">
           Discover the best and most hygienic messes near you.
         </p>
-        <div className="relative mt-8 max-w-xl mx-auto bg-white rounded-2xl">
+        <div className="relative mt-8 max-w-2xl w-7/8 mx-auto bg-white rounded-2xl">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-black rounded-2xl" />
           <Input
-            className="w-full pl-10 h-12 text-black rounded-2xl"
+            className="w-full pl-10 h-12 text-black "
             placeholder="Search by mess name..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}

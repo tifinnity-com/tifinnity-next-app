@@ -57,7 +57,7 @@ export default function WhyChooseTiffinity() {
   return (
     <section
       id="feature"
-      className="px-4 py-12 md:px-6 md:py-16 h-screen flex flex-col items-center justify-center max-w-7xl mx-auto"
+      className="px-4 py-12 md:px-6 md:py-24  max-w-7xl mx-auto"
     >
       <div className="text-center mb-8 md:mb-12">
         <h3 className="text-3xl font-bold text-tifinnity-green mb-4">

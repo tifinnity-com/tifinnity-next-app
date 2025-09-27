@@ -14,7 +14,7 @@ export default function Header() {
   ];
 
   return (
-    <header className="fixed w-full left-0 right-0 top-0 backdrop-blur-2xl  mx-auto z-50 border">
+    <header className="fixed w-full left-0 right-0 top-0 bg-tifinnity-cream backdrop-blur-2xl  mx-auto z-50 border">
       <div className="max-w-7xl w-full mx-auto flex items-center justify-between px-4 py-4 md:px-6">
         <div className="flex items-center gap-2 ">
           <div className="w-8 h-8 bg-tifinnity-green rounded flex items-center justify-center">

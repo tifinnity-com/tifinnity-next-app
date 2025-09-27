@@ -41,7 +41,7 @@ export default async function CustomerDashboard() {
     .limit(3);
 
   return (
-    <div className="container mx-auto p-4 sm:p-6 lg:p-8">
+    <div className="container max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold tracking-tight">
           Welcome to Your Tifinnity, {user?.user_metadata.full_name || "User"}!
@@ -58,39 +58,41 @@ export default async function CustomerDashboard() {
               <CardTitle>Your Meal Plans</CardTitle>
             </CardHeader>
             <CardContent>
-              subscriptions?.length ? (
-              <ul className="space-y-4">
-                {subscriptions?.map((sub: Subscription) => (
-                  <li
-                    key={sub.id}
-                    className="flex items-center justify-between"
-                  >
-                    <div>
-                      <p className="font-semibold">
-                        {sub.messes?.length
-                          ? sub.messes.map((mess, i) => (
-                              <span key={i}>{mess.name || "Unnamed Mess"}</span>
-                            ))
-                          : "No mess info"}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        {sub.subscription_type} Plan
-                      </p>
-                    </div>
-                    <Button asChild variant="outline">
-                      <Link href="/customer/subscriptions">View</Link>
-                    </Button>
-                  </li>
-                ))}
-              </ul>
+              {subscriptions?.length ? (
+                <ul className="space-y-4">
+                  {subscriptions?.map((sub: Subscription) => (
+                    <li
+                      key={sub.id}
+                      className="flex items-center justify-between"
+                    >
+                      <div>
+                        <p className="font-semibold">
+                          {sub.messes?.length
+                            ? sub.messes.map((mess, i) => (
+                                <span key={i}>
+                                  {mess.name || "Unnamed Mess"}
+                                </span>
+                              ))
+                            : "No mess info"}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          {sub.subscription_type} Plan
+                        </p>
+                      </div>
+                      <Button asChild variant="outline">
+                        <Link href="/customer/subscriptions">View</Link>
+                      </Button>
+                    </li>
+                  ))}
+                </ul>
               ) : (
-              <div className="text-center py-8">
-                <p>No active plans.</p>
-                <Button asChild className="mt-4">
-                  <Link href="/customer/messes">Find a mess!</Link>
-                </Button>
-              </div>
-              )
+                <div className="text-center py-8">
+                  <p>No active plans.</p>
+                  <Button asChild className="mt-4">
+                    <Link href="/customer/messes">Find a mess!</Link>
+                  </Button>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>

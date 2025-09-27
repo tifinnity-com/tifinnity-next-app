@@ -31,7 +31,7 @@ export default function HowItWorks() {
   return (
     <section
       id="how-it-works"
-      className="px-4 py-12 md:px-6 md:py-16 max-w-7xl mx-auto text-center"
+      className="px-4 py-12 h-screen flex flex-col items-center justify-center md:px-6 md:py-16 lg:py-32 max-w-7xl mx-auto text-center"
     >
       <h3 className="text-3xl font-bold text-tifinnity-green mb-4">
         How it Works

@@ -99,7 +99,7 @@ export default function AppHeader() {
       transition={{ duration: 0.5, ease: "easeInOut" }}
       className="sticky top-0 z-50 w-full   border-b"
     >
-      <div className="container  flex h-16 max-w-7xl items-center justify-between mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="container bg-tifinnity-cream flex h-16 max-w-7xl items-center justify-between mx-auto px-4 sm:px-6 lg:px-8">
         <Link
           href="/customer"
           className="flex items-center gap-3 text-2xl font-bold text-tifinnity-green transition-transform hover:scale-105"

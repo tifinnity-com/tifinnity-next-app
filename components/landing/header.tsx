@@ -1,8 +1,9 @@
 "use client";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ChefHat, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -15,9 +16,9 @@ export default function Header() {
 
   return (
     <header className="fixed w-full left-0 right-0 top-0 bg-tifinnity-cream backdrop-blur-2xl  mx-auto z-50 border">
-      <div className="max-w-7xl w-full mx-auto flex items-center justify-between px-4 py-4 md:px-6">
+      <div className="max-w-7xl w-full mx-auto flex items-center justify-between px-4 md:px-6">
         <div className="flex items-center gap-2 ">
-          <div className="w-8 h-8 bg-tifinnity-green rounded flex items-center justify-center">
+          {/* <div className="w-8 h-8 bg-tifinnity-green rounded flex items-center justify-center">
             <ChefHat className="w-5 h-5 text-white" />
           </div>
           <div>
@@ -27,7 +28,14 @@ export default function Header() {
             <p className="text-xs text-tifinnity-gray">
               Cooking smiles, delivering joy.
             </p>
-          </div>
+          </div> */}
+          <Image
+            className="w-auto h-14 object-cover mt-1"
+            src="/logo.png"
+            alt="logo"
+            width={600}
+            height={400}
+          />
         </div>
 
         <nav className="hidden md:flex items-center gap-8">

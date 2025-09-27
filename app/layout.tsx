@@ -9,6 +9,11 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "Tifinnity | For Students and Mess Owners",
   description: "Tifinnity App for Students and Mess Owners",
+  icons: {
+    icon: "/favicon.ico",
+    shortcut: "/favicon.ico",
+    apple: "/favicon.ico",
+  },
 };
 
 export default function RootLayout({

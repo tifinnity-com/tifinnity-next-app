@@ -104,7 +104,7 @@ export default function MessDetailPage({ messId }: { messId: string }) {
     }, {} as Record<string, MenuItem[]>);
   };
 
-  const dailyMenu = groupMenuByCategory(
+  const OnceMenu = groupMenuByCategory(
     menuItems.filter(
       (item) =>
         new Date(item.menu_date).toDateString() === new Date().toDateString()
@@ -132,7 +132,7 @@ export default function MessDetailPage({ messId }: { messId: string }) {
 
     const end_date = new Date();
 
-    if (plan == "daily") {
+    if (plan == "Once") {
       end_date.setDate(end_date.getDate() + 1);
     } else if (plan == "weekly") {
       end_date.setDate(end_date.getDate() + 7);
@@ -217,8 +217,8 @@ export default function MessDetailPage({ messId }: { messId: string }) {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  {Object.entries(dailyMenu).length > 0 ? (
-                    Object.entries(dailyMenu).map(([category, items]) => (
+                  {Object.entries(OnceMenu).length > 0 ? (
+                    Object.entries(OnceMenu).map(([category, items]) => (
                       <div key={category}>
                         <h3 className="text-xl font-semibold mb-3 flex items-center">
                           <Utensils className="mr-2 h-5 w-5" /> {category}
@@ -322,7 +322,7 @@ export default function MessDetailPage({ messId }: { messId: string }) {
                     onSelect={setSelectedPlan}
                   />
                   <SubscriptionPlanCard
-                    plan="daily"
+                    plan="Once"
                     price="100"
                     selectedPlan={selectedPlan}
                     onSelect={setSelectedPlan}
@@ -378,7 +378,7 @@ function SubscriptionPlanCard({
       <CardHeader>
         <CardTitle className="capitalize">{plan}</CardTitle>
         <CardDescription>
-          ₹{price} / {plan === "daily" ? "day" : plan.slice(0, -2)}
+          ₹{price} / {plan === "Once" ? "day" : plan.slice(0, -2)}
         </CardDescription>
       </CardHeader>
       <CardFooter>

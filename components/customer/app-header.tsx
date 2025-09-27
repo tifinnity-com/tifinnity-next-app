@@ -4,7 +4,7 @@ import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { usePathname, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { createClient } from "@/utils/supabase/client";
-import { ChefHat, Menu } from "lucide-react";
+import { Menu } from "lucide-react";
 import { useIsMobile } from "@/hook/use-mobile";
 import {
   Sheet,
@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
 
 // Navigation links data
 const navItems = [
@@ -104,10 +105,17 @@ export default function AppHeader() {
           href="/customer"
           className="flex items-center gap-3 text-2xl font-bold text-tifinnity-green transition-transform hover:scale-105"
         >
-          <div className="bg-tifinnity-green rounded-md p-1.5">
+          {/* <div className="bg-tifinnity-green rounded-md p-1.5">
             <ChefHat className="h-6 w-6 text-white" />
           </div>
-          <span className="hidden sm:inline-block">Tifinnity</span>
+          <span className="hidden sm:inline-block">Tifinnity</span> */}
+          <Image
+            className="w-auto h-14 object-cover mt-1"
+            src="/logo.png"
+            alt="logo"
+            width={600}
+            height={400}
+          />
         </Link>
 
         {isMobile ? (

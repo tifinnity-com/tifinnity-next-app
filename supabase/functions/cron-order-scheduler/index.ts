@@ -1,8 +1,7 @@
 
 import "jsr:@supabase/functions-js/edge-runtime.d.ts"
-import { createClient }  from "jsr:@supabase/supabase-js@2"
+import { createClient }  from "@supabase/supabase-js"
 
-console.log("Hello from Functions!")
 
 Deno.serve(async (req) => {
   try {
@@ -46,9 +45,10 @@ Deno.serve(async (req) => {
 
       orders.push(order);
 
+      if (orderError) throw orderError;
 
     }
-    
+
     return new Response(JSON.stringify({ message: 'Subscription orders generated', orders }), {
       headers: { 'Content-Type': 'application/json' },
       status: 200

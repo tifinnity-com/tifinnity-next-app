@@ -24,6 +24,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/utils/supabase/client";
 import type { User } from "@supabase/supabase-js";
+import Image from "next/image";
 
 const navLinks = [
   { href: "/partner/dashboard", label: "Dashboard" },
@@ -83,7 +84,13 @@ export default function Navbar() {
                 <SheetHeader className="p-4 border-b">
                   <SheetTitle>
                     <Link href="/partner/dashboard" className="flex items-center gap-2 text-2xl font-bold text-primary" onClick={() => setMobileMenuOpen(false)}>
-                      <ChefHat />
+                        <Image
+                            className="w-auto h-14 object-cover py-2"
+                            src="/logo.jpg"
+                            alt="logo"
+                            width={600}
+                            height={400}
+                        />
                       <span>Tiffinity Partner</span>
                     </Link>
                   </SheetTitle>

@@ -98,7 +98,7 @@ export default function AppHeader() {
       initial={{ y: -100, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.5, ease: "easeInOut" }}
-      className="sticky top-0 z-50 w-full   border-b"
+      className="sticky top-0 z-50 w-full  bg-tifinnity-cream   border-b"
     >
       <div className="container bg-tifinnity-cream flex h-16 max-w-7xl items-center justify-between mx-auto px-4 sm:px-6 lg:px-8">
         <Link
@@ -110,8 +110,8 @@ export default function AppHeader() {
           </div>
           <span className="hidden sm:inline-block">Tifinnity</span> */}
           <Image
-            className="w-auto h-14 object-cover mt-1"
-            src="/logo.png"
+            className="w-auto h-14 object-cover py-2"
+            src="/logo.jpg"
             alt="logo"
             width={600}
             height={400}

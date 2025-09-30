@@ -20,6 +20,7 @@ import { useRouter } from "next/navigation";
 import { useState, ChangeEvent, FormEvent } from "react";
 import { Loader2, CheckCircle2, XCircle } from "lucide-react";
 import { GoogleIcon } from "@/components/ui/google-icon";
+import ForgotPasswordDialog from "./forgot-password-dialog";
 
 // Simplified FormData for the login form
 interface FormData {
@@ -138,13 +139,13 @@ export function LoginForm() {
       <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center w-full">
         <div className="order-2 md:order-1">
           <div className="max-w-md mx-auto">
-            <Image
-              className="w-auto h-24 object-cover"
-              src="/logo.png"
+            {/* <Image
+              className="w-auto h-24 object-cover py-2"
+              src="/logo.jpg"
               alt="logo"
               width={600}
               height={400}
-            />
+            /> */}
             <h2 className="text-4xl md:text-5xl font-bold mb-2 leading-tight">
               <span className="text-tifinnity-orange">Welcome</span>
               <br />
@@ -223,13 +224,7 @@ export function LoginForm() {
                     Remember me
                   </Label>
                 </div>
-
-                <Link
-                  href="/auth/forgot-password"
-                  className="text-sm text-tifinnity-green hover:underline"
-                >
-                  Forgot password?
-                </Link>
+                <ForgotPasswordDialog />
               </div>
 
               <Button

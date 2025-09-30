@@ -30,8 +30,8 @@ export default function Header() {
             </p>
           </div> */}
           <Image
-            className="w-auto h-14 object-cover mt-1"
-            src="/logo.png"
+            className="w-auto h-14 object-cover mt-1 py-2"
+            src="/logo.jpg"
             alt="logo"
             width={600}
             height={400}

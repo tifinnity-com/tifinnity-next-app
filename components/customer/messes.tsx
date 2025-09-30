@@ -34,22 +34,22 @@ function HeroSection({
   setSearchQuery: (query: string) => void;
 }) {
   return (
-    <div className="relative flex flex-col items-center justify-center mb-12 text-center py-16 sm:py-24 rounded-lg overflow-hidden">
+    <div className="relative flex flex-col items-center justify-center mb-12 text-center py-16 sm:py-24  overflow-hidden">
       {/* Background Image with a darkening overlay for better text readability */}
       <Image
-        src="/landing.jpg"
+        src="/hero-student.jpg"
         fill
-        className="object-cover -z-20"
+        className="object-cover w-full h-auto -z-20"
         alt="Tiffin service background"
         priority
       />
-      <div className="absolute inset-0 bg-black/50 -z-10" />
+      <div className="absolute inset-0 bg-black/20 -z-10" />
 
       <div className="container max-w-3xl">
-        <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-white">
+        <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-white ">
           Find Your Perfect Tiffin
         </h1>
-        <p className="mt-4 text-lg text-gray-100">
+        <p className="mt-4 text-lg text-gray-100 ">
           Discover the best and most hygienic messes near you.
         </p>
         <div className="relative mt-8 max-w-2xl w-7/8 mx-auto bg-white rounded-2xl">
@@ -174,26 +174,32 @@ export default function MessesPage() {
   }, [messes, searchQuery]);
 
   return (
-    <div className="container max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+    <div className="container  mx-auto ">
       <HeroSection searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
 
       {isLoading ? (
         // Show a grid of skeletons while loading
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {Array.from({ length: 8 }).map((_, index) => (
-            <MessCardSkeleton key={index} />
-          ))}
-        </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 p-4">
+                {Array.from({ length: 8 }).map((_, index) => (
+                    <MessCardSkeleton key={index} />
+                ))}
+            </div>
       ) : filteredMesses.length > 0 ? (
-        // Show the grid of messes
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {filteredMesses.map((mess) => (
-            <MessCard key={mess.id} mess={mess} />
-          ))}
-        </div>
+
+            <div className="space-y-6 p-8 sm:p-4 lg:p-12">
+                <div>
+                    <h3 className="text-3xl font-semibold">Recommended for you</h3>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 p-4">
+                    {filteredMesses.map((mess) => (
+                        <MessCard key={mess.id} mess={mess} />
+                    ))}
+                </div>
+            </div>
       ) : (
         // Show message if no results are found
-        <div className="text-center py-16">
+        <div className="text-center py-16 p-4">
           <h2 className="text-2xl font-semibold text-muted-foreground">
             No Messes Found
           </h2>

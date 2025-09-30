@@ -148,15 +148,15 @@ export function StudentSignupForm() {
             <h2 className="text-4xl md:text-5xl font-bold mb-2 leading-tight">
               <span className="text-tifinnity-orange">Join</span>
               {/* <br /> */}
-              {/* <span className="text-tifinnity-green">Tifinnity</span>
-               */}
-              <Image
+              <span className="text-tifinnity-green">Tifinnity</span>
+
+              {/* <Image
                 className="w-auto h-24 object-cover"
-                src="/logo.png"
+                src="/logo.jpg"
                 alt="logo"
                 width={600}
                 height={400}
-              />
+              /> */}
             </h2>
             <p className="text-tifinnity-gray text-base md:text-lg mb-6 md:mb-8">
               Create a student account to get started

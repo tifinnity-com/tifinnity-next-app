@@ -62,6 +62,7 @@ import { SupabaseClient } from "@supabase/supabase-js";
 type MenuItem = {
   id: string;
   item_name: string;
+  item_description: string;
   price: number;
   menu_date: string;
   available: boolean;
@@ -316,6 +317,20 @@ export default function MenuManagementPage() {
                   required
                 />
               </div>
+                <div className="space-y-2">
+                    <Label htmlFor="item_name">Item Description</Label>
+                    <Input
+                        id="item_name"
+                        value={editingItem?.item_description || ""}
+                        onChange={(e) =>
+                            setEditingItem({
+                                ...editingItem,
+                                item_description: e.target.value,
+                            })
+                        }
+                        required
+                    />
+                </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="price">Price (₹)</Label>

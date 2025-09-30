@@ -104,16 +104,16 @@ export default function OrdersHistory() {
   }
 
   return (
-    <Card>
+    <Card className="max-w-7xl mx-auto">
       <CardHeader>
         <CardTitle>Your Orders</CardTitle>
         <CardDescription>
           A list of all your past orders with us.
         </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent >
         {orders.length === 0 ? (
-          <div className="text-center py-12 border-dashed border-2 rounded-lg">
+          <div className="text-center  py-12 border-dashed border-2 rounded-lg">
             <ShoppingBag className="mx-auto h-12 w-12 text-gray-400" />
             <h3 className="mt-4 text-xl font-semibold">No Orders Yet</h3>
             <p className="mt-1 text-sm text-muted-foreground">
@@ -169,7 +169,7 @@ export default function OrdersHistory() {
 
 function OrderHistorySkeleton() {
   return (
-    <Card>
+    <Card className="max-w-7xl mx-auto">
       <CardHeader>
         <Skeleton className="h-8 w-1/3" />
         <Skeleton className="h-4 w-1/2 mt-2" />

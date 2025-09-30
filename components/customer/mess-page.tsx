@@ -11,7 +11,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Star, Utensils } from "lucide-react";
+import { Star } from "lucide-react";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
@@ -34,7 +34,7 @@ interface MenuItem {
   id: string;
   item_name: string;
   price: number;
-  description: string;
+  item_description: string;
   category: "Breakfast" | "Lunch" | "Dinner";
   menu_date: string; // Assuming date is in 'YYYY-MM-DD' format
 }
@@ -132,7 +132,7 @@ export default function MessDetailPage({ messId }: { messId: string }) {
 
     const end_date = new Date();
 
-    if (plan == "Once") {
+    if (plan == "once") {
       end_date.setDate(end_date.getDate() + 1);
     } else if (plan == "weekly") {
       end_date.setDate(end_date.getDate() + 7);
@@ -220,9 +220,7 @@ export default function MessDetailPage({ messId }: { messId: string }) {
                   {Object.entries(OnceMenu).length > 0 ? (
                     Object.entries(OnceMenu).map(([category, items]) => (
                       <div key={category}>
-                        <h3 className="text-xl font-semibold mb-3 flex items-center">
-                          <Utensils className="mr-2 h-5 w-5" /> {category}
-                        </h3>
+
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                           {items.map((item) => (
                             <Card key={item.id}>
@@ -233,7 +231,7 @@ export default function MessDetailPage({ messId }: { messId: string }) {
                               </CardHeader>
                               <CardContent>
                                 <p className="text-sm text-muted-foreground">
-                                  {item.description}
+                                  {item.item_description}
                                 </p>
                               </CardContent>
                               <CardFooter>
@@ -322,7 +320,7 @@ export default function MessDetailPage({ messId }: { messId: string }) {
                     onSelect={setSelectedPlan}
                   />
                   <SubscriptionPlanCard
-                    plan="Once"
+                    plan="once"
                     price="100"
                     selectedPlan={selectedPlan}
                     onSelect={setSelectedPlan}
@@ -378,7 +376,7 @@ function SubscriptionPlanCard({
       <CardHeader>
         <CardTitle className="capitalize">{plan}</CardTitle>
         <CardDescription>
-          ₹{price} / {plan === "Once" ? "day" : plan.slice(0, -2)}
+          ₹{price} / {plan === "once" ? "time" : plan.slice(0, -2)}
         </CardDescription>
       </CardHeader>
       <CardFooter>
